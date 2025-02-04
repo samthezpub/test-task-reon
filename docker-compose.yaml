@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    container_name: app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL="postgresql://postgres:password@localhost:5432/db?schema=public"
+      - PORT=3001
+      - JWT_SECRET_KEY="THISISVERYSECRETSECRETKEYSHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:13
+    container_name: db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
