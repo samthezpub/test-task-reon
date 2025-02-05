@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import {dotenvConfig} from './dotenvConfig';
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
 
 const PORT = dotenvConfig.parsed?.PORT || 3000;
 
@@ -12,7 +14,32 @@ import taskRoute from './routes/taskRoute.js';
 import {validateBodyMiddleware} from "./middlewares/validateMiddleware";
 import {errorMiddleware} from "./middlewares/errorMiddleware";
 
+// Swagger setup
+const swaggerOptions = {
+  swaggerDefinition: {
+    myapi: '3.0.0',
+    info: {
+      title: 'My API',
+      version: '1.0.0',
+      description: 'API documentation',
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+      },
+    ],
+  },
+  apis: ['./routes/*.ts', './controllers/*.ts'],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+
 app.use(express.json()); // должен быть для работы с валидацией
+
+
 
 
 // @ts-ignore

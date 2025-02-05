@@ -1,11 +1,39 @@
 import { Request, Response } from "express";
-import { Project } from "@prisma/client";
 import prisma from "../prisma/prisma";
 
 export class ProjectController {
+
+    /**
+     * @swagger
+     * /projects/create:
+     *   post:
+     *     summary: Создать новый проект
+     *     description: Создает новый проект и добавляет создателя в участники.
+     *     tags: [Projects]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               name:
+     *                 type: string
+     *               description:
+     *                 type: string
+     *               creatorId:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Проект успешно создан
+     *       400:
+     *         description: Неверные данные
+     */
     public static async createProject(req: Request, res: Response) {
         try {
-            const { name, description, creatorId }: Project = req.body;
+            const { name, description, creatorId } = req.body;
             const newProject = await prisma.project.create({ data: { name, description, creatorId } });
 
             await prisma.project.update({ where: { id: newProject.id }, data: { members: { connect: { id: creatorId } } } });
@@ -16,9 +44,37 @@ export class ProjectController {
         }
     }
 
+    /**
+     * @swagger
+     * /projects/update:
+     *   post:
+     *     summary: Обновить данные проекта
+     *     description: Обновляет название и описание проекта по ID.
+     *     tags: [Projects]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               id:
+     *                 type: string
+     *               name:
+     *                 type: string
+     *               description:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Проект обновлен
+     *       404:
+     *         description: Проект не найден
+     */
     public static async updateProject(req: Request, res: Response) {
         try {
-            const { id, name, description }: Project = req.body;
+            const { id, name, description } = req.body;
 
             const newProject = await prisma.project.update({ where: { id }, data: { name, description } });
 
@@ -28,9 +84,33 @@ export class ProjectController {
         }
     }
 
+    /**
+     * @swagger
+     * /projects/delete:
+     *   post:
+     *     summary: Удалить проект
+     *     description: Помечает проект как архивный.
+     *     tags: [Projects]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               id:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Проект удален
+     *       404:
+     *         description: Проект не найден
+     */
     public static async deleteProject(req: Request, res: Response) {
         try {
-            const { id }: Project = req.body;
+            const { id } = req.body;
 
             await prisma.project.update({ where: { id }, data: { archived: true } });
 
@@ -40,6 +120,32 @@ export class ProjectController {
         }
     }
 
+    /**
+     * @swagger
+     * /projects/addUser:
+     *   post:
+     *     summary: Добавить пользователя в проект
+     *     description: Добавляет пользователя в список участников проекта.
+     *     tags: [Projects]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               projectId:
+     *                 type: string
+     *               userId:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Пользователь добавлен
+     *       404:
+     *         description: Проект или пользователь не найдены
+     */
     public static async addUserToProject(req: Request, res: Response) {
         try {
             const { projectId, userId } = req.body;
@@ -52,6 +158,32 @@ export class ProjectController {
         }
     }
 
+    /**
+     * @swagger
+     * /projects/deleteUser:
+     *   post:
+     *     summary: Удалить пользователя из проекта
+     *     description: Удаляет пользователя из списка участников проекта.
+     *     tags: [Projects]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               projectId:
+     *                 type: string
+     *               userId:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Пользователь удален
+     *       404:
+     *         description: Проект или пользователь не найдены
+     */
     public static async deleteUserFromProject(req: Request, res: Response) {
         try {
             const { projectId, userId } = req.body;
